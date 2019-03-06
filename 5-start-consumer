@@ -1,0 +1,4 @@
+cd kafka_2.11-2.1.0
+topic=$1
+echo $topic
+bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic $topic --from-beginning
