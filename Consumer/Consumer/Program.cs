@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
-using Confluent.Kafka;
-using Confluent.Kafka.Serialization;
+using Confluent.Kafka; //version 0.11.6
+using Confluent.Kafka.Serialization; //version 0.11.6
 
 namespace Consumer
 {
