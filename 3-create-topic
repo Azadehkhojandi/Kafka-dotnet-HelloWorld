@@ -1,7 +1,4 @@
 cd kafka_2.11-2.1.0
 bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic my-topic
 #bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 3 --partitions 1 --topic my-replicated-topic
-echo 'all topis'
-bin/kafka-topics.sh --list --zookeeper localhost:2181 &
 #bin/kafka-topics.sh --describe --zookeeper localhost:2181 --topic my-replicated-topic 
-bin/kafka-topics.sh --describe --zookeeper localhost:2181 --topic test 

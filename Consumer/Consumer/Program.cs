@@ -1,79 +1,47 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text;
 using System.Threading;
 using Confluent.Kafka;
+using Confluent.Kafka.Serialization;
 
 namespace Consumer
 {
-    class Program
+    public class Program
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello Kafka!");
-
-            //https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
-            var conf = new ConsumerConfig
+            var config = new Dictionary<string, object>
             {
-                GroupId = "blah-blah-wwwww",
-                BootstrapServers = "PLAINTEXT://:9092",
-                // Note: The AutoOffsetReset property determines the start offset in the event
-                // there are not yet any committed offsets for the consumer group for the
-                // topic/partitions of interest. By default, offsets are committed
-                // automatically, so in this example, consumption will only start from the
-                // earliest message in the topic 'my-topic' the first time you run the program.
-                AutoOffsetReset = AutoOffsetReset.Earliest
+                { "group.id", "sample-consumer" },
+                { "bootstrap.servers", "127.0.0.1:9092" },
+                { "enable.auto.commit", "false"}
             };
+            var topic = "my-topic";
+            Console.WriteLine($"reads messages in {topic}");
+            using (var consumer = new Consumer<Null, string>(config, null, new StringDeserializer(Encoding.UTF8)))
+            {                
+                consumer.Subscribe(new string[]{topic});
 
-            using (var c = new ConsumerBuilder<Ignore, string>(conf).SetErrorHandler((_, e) =>
-                   Console.WriteLine($"Error: {e.Reason}"))
-                .SetStatisticsHandler((_, json) =>
-                    Console.WriteLine($"Statistics: {json}"))
-                .SetRebalanceHandler((_, e) =>
+                consumer.OnError +=(_, e) =>
                 {
-                    if (e.IsAssignment)
-                    {
-                        Console.WriteLine($"Assigned partitions: [{string.Join(", ", e.Partitions)}]");
-                        // possibly override the default partition assignment behavior:
-                        // consumer.Assign(...) 
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Revoked partitions: [{string.Join(", ", e.Partitions)}]");
-                        // consumer.Unassign()
-                    }
-                })
-                .Build())
-            {
-                c.Subscribe("my-topic-33");
-
-                CancellationTokenSource cts = new CancellationTokenSource();
-                Console.CancelKeyPress += (_, e) =>
-                {
-                    e.Cancel = true; // prevent the process from terminating.
-                    cts.Cancel();
+                    Console.WriteLine(e.Reason);
                 };
 
-                try
+                consumer.OnMessage += (_, msg) => 
                 {
-                    while (true)
-                    {
-                        try
-                        {
-                            var cr = c.Consume(cts.Token);
-                            Console.WriteLine($"Consumed message '{cr.Value}' at: '{cr.TopicPartitionOffset}'.");
-                        }
-                        catch (ConsumeException e)
-                        {
-                            Console.WriteLine($"Error occured: {e.Error.Reason}");
-                        }
-                    }
-                }
-                catch (OperationCanceledException)
+                    Console.WriteLine($"Topic: {msg.Topic} Partition: {msg.Partition} Offset: {msg.Offset} {msg.Value}");
+                    consumer.CommitAsync(msg);
+                };
+
+                while (true)
                 {
-                    // Ensure the consumer leaves the group cleanly and final offsets are committed.
-                    c.Close();
+                    consumer.Poll(100);
                 }
             }
         }
+
+        
     }
 }
 
