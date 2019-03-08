@@ -50,12 +50,18 @@ The solution for it is running the consumer and producer app on  Linux sub syste
 ####  Install .Net Core 2.2 on UBuntu 
 
 `curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg`
+
 `sudo mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg`
+
 `sudo sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-bionic-prod bionic main" > /etc/apt/sources.list.d/dotnetdev.list'`
 
+
 `sudo apt-get install apt-transport-https`
+
 `sudo apt-get update`
+
 `sudo apt-get install dotnet-sdk-2.2`
+
 
 ## References 
 https://kafka.apache.org/quickstart
